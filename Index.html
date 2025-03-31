@@ -36,7 +36,6 @@
             margin-bottom: 20px;
         }
 
-        /* "가수"와 "노래 제목" 라벨 색상 변경 */
         label {
             font-size: 1.1rem;
             margin-bottom: 8px;
@@ -80,12 +79,14 @@
             position: fixed;  /* 화면에 고정 */
             top: 20px;  /* 상단에서 20px 떨어짐 */
             right: 20px;  /* 오른쪽에서 20px 떨어짐 */
-            width: 250px;  /* 너비 설정 */
+            width: 280px;  /* 너비 설정 */
             background-color: #1c1c1c;  /* 어두운 배경 */
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             border-radius: 10px;
             text-align: left;
+            max-height: 80vh; /* 화면의 80%만큼 높이 제한 */
+            overflow-y: auto; /* 넘칠 경우 스크롤 가능 */
         }
 
         #billboard-list {
@@ -97,20 +98,30 @@
         }
 
         #billboard-list li {
-            margin-bottom: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;  /* 수직 중앙 정렬 */
+            font-size: 1rem;
+            color: #ffffff;
         }
 
-        /* 애니메이션 */
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        #billboard-list img {
+            width: 50px;  /* 앨범 커버 크기 */
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 10px; /* 앨범 커버와 제목 사이 간격 */
         }
+
+        #billboard-list li span {
+            flex: 1;
+        }
+
+        #billboard-list li .rank {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #1DB954;  /* 초록색으로 랭크 강조 */
+        }
+
     </style>
 </head>
 <body>
@@ -154,32 +165,24 @@
             const artist = document.getElementById('artist').value;
             const title = document.getElementById('title').value;
 
-            // 결과를 표시할 요소
             const resultDiv = document.getElementById('lyrics-result');
             resultDiv.innerHTML = '<p>로딩 중...</p>';  // 로딩 메시지 표시
 
             try {
-                // 백엔드 API로 요청
                 const response = await fetch(`http://localhost:3000/artist/${artist}/title/${title}`);
                 const data = await response.text();
 
-                // 가사 표시
                 resultDiv.innerHTML = `<pre>${data}</pre>`;
-
-                // 검색 기록에 추가
                 addSearchHistory(artist, title, data);
 
-                // 가사 다운로드 버튼 추가
                 const downloadButton = document.createElement('button');
                 downloadButton.textContent = '가사 다운로드';
-                downloadButton.classList.add('download-button');
                 downloadButton.onclick = function () {
                     downloadLyrics(data, artist, title);
                 };
                 resultDiv.appendChild(downloadButton);
 
             } catch (error) {
-                // 오류 발생 시
                 resultDiv.innerHTML = '<p>가사를 가져오는 데 실패했습니다. 다시 시도해주세요.</p>';
             }
         });
@@ -192,9 +195,22 @@
 
                 // Billboard Hot 100 목록을 표시
                 const listElement = document.getElementById('billboard-list');
-                data.data.forEach(song => {
+                data.data.slice(0, 20).forEach(song => {
                     const listItem = document.createElement('li');
-                    listItem.textContent = `${song.rank}. ${song.name} - ${song.artist}`;
+
+                    const rank = document.createElement('span');
+                    rank.classList.add('rank');
+                    rank.textContent = `${song.rank}.`;
+
+                    const img = document.createElement('img');
+                    img.src = song.image; // 앨범 커버 이미지 URL
+
+                    const text = document.createElement('span');
+                    text.textContent = `${song.name} - ${song.artist}`;
+
+                    listItem.appendChild(rank);
+                    listItem.appendChild(img);
+                    listItem.appendChild(text);
                     listElement.appendChild(listItem);
                 });
 
@@ -210,7 +226,6 @@
         function addSearchHistory(artist, title, lyrics) {
             const historyList = document.getElementById('search-history');
             
-            // 검색 기록이 5개를 초과하면 가장 오래된 항목을 삭제
             if (historyList.children.length >= 5) {
                 historyList.removeChild(historyList.children[0]);
             }
