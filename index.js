@@ -34,3 +34,4 @@ app.get('/artist/:artist/title/:title', async (req, res) => {
         res.status(500).send('가사 가져오기 실패. 외부 서비스에 문제가 있을 수 있습니다.');
     }
 });
+
