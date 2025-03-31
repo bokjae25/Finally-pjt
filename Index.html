@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가사 검색</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 기본 스타일 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            background-color: #f4f4f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow-y: auto;  /* 수직 스크롤 가능하도록 추가 */
+        }
+    
+        .container {
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out;
+            overflow: hidden;  /* 내용 넘침 방지 */
+        }
+    
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+    
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+    
+        label {
+            font-size: 1.1rem;
+            color: #333;
+            text-align: left;
+        }
+    
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1.1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+    
+        input[type="text"]:focus {
+            border-color: #007aff;
+            box-shadow: 0 0 8px rgba(0, 122, 255, 0.6);
+        }
+    
+        button {
+            padding: 12px 0;
+            font-size: 1.1rem;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+    
+        button:hover {
+            background-color: #005bb5;
+        }
+    
+        /* 가사 결과 영역 */
+        .lyrics-result {
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            color: #555;
+            min-height: 100px;
+            max-height: 300px;  /* 가사 영역 최대 높이 제한 */
+            overflow-y: auto;  /* 가사 내용이 길어지면 스크롤 */
+            animation: slideIn 0.6s ease-out;
+            font-family: 'Lora', serif;  /* 예쁜 서체 적용 */
+            font-size: 1.2rem;  /* 폰트 크기 조정 */
+            line-height: 1.6;  /* 가사 간 간격 조정 */
+            color: #333;  /* 글자 색상 */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    
+        pre {
+            font-size: 1.2rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+        }
+    
+        /* 애니메이션 */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    
+        /* Google Fonts 서체 */
+        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap');
+    </style>
+    
+    
+</head>
+<body>
+    <div class="container">
+        <h1>가사 검색</h1>
+        <form id="lyrics-form">
+            <label for="artist">가수:</label>
+            <input type="text" id="artist" name="artist" placeholder="가수 이름을 입력하세요" required>
+
+            <label for="title">노래 제목:</label>
+            <input type="text" id="title" name="title" placeholder="노래 제목을 입력하세요" required>
+
+            <button type="submit">가사 찾기</button>
+        </form>
+
+        <div id="lyrics-result" class="lyrics-result">
+            <p>검색된 가사가 여기에 표시됩니다.</p>
+        </div>
+    </div>
+
+    <script>
+        // 폼 제출 시 가사 검색
+        document.getElementById('lyrics-form').addEventListener('submit', async function (e) {
+            e.preventDefault();  // 기본 폼 제출 방지
+
+            const artist = document.getElementById('artist').value;
+            const title = document.getElementById('title').value;
+
+            // 결과를 표시할 요소
+            const resultDiv = document.getElementById('lyrics-result');
+            resultDiv.innerHTML = '<p>로딩 중...</p>';  // 로딩 메시지 표시
+
+            try {
+                // 백엔드 API로 요청
+                const response = await fetch(`http://localhost:3000/artist/${artist}/title/${title}`);
+                const data = await response.text();
+
+                // 가사 표시
+                resultDiv.innerHTML = `<pre>${data}</pre>`;
+            } catch (error) {
+                // 오류 발생 시
+                resultDiv.innerHTML = '<p>가사를 가져오는 데 실패했습니다. 다시 시도해주세요.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
