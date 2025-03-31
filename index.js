@@ -35,3 +35,16 @@ app.get('/artist/:artist/title/:title', async (req, res) => {
     }
 });
 
+
+
+app.get('/billchart', async (req, res) => {
+    try {
+        // 외부 API 호출
+        const response = await axios.get('https://raw.githubusercontent.com/KoreanThinker/billboard-json/main/billboard-hot-100/recent.json');
+        
+        // 데이터를 클라이언트에게 JSON 형태로 전달
+        res.json(response.data); // 응답 데이터 형식 확인
+    } catch (error) {
+        res.status(500).json({ error: 'API 호출에 실패했습니다.' });
+    }
+});
