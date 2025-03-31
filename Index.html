@@ -6,10 +6,10 @@
     <title>가사 검색</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* 기본 스타일 */
+        /* Spotify 스타일 기본 */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-            background-color: #f4f4f7;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212; /* 어두운 배경 */
             margin: 0;
             padding: 0;
             display: flex;
@@ -17,24 +17,62 @@
             align-items: center;
             flex-direction: column;
             height: 100vh;
-            position: relative; /* 부모 요소에 상대적 위치 설정 */
+            color: #ffffff; /* 흰색 텍스트 */
         }
 
         .container {
-            background-color: #fff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: #1c1c1c; /* 어두운 회색 배경 */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             border-radius: 10px;
             padding: 30px;
             width: 100%;
             max-width: 600px;
             text-align: center;
-            animation: fadeIn 0.8s ease-in-out;
         }
 
         h1 {
             font-size: 2rem;
-            color: #333;
+            color: #1DB954; /* Spotify 녹색 */
             margin-bottom: 20px;
+        }
+
+        /* "가수"와 "노래 제목" 라벨 색상 변경 */
+        label {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: block;
+            color: #ffffff; /* 흰색으로 설정 */
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1DB954; /* 초록색 포커스 */
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #1DB954; /* Spotify 초록색 */
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #1ed760; /* 마우스 올렸을 때 더 밝은 초록색 */
         }
 
         /* Billboard 핫100 스타일 */
@@ -43,18 +81,18 @@
             top: 20px;  /* 상단에서 20px 떨어짐 */
             right: 20px;  /* 오른쪽에서 20px 떨어짐 */
             width: 250px;  /* 너비 설정 */
-            background-color: #fff;  /* 배경색 */
+            background-color: #1c1c1c;  /* 어두운 배경 */
             padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             border-radius: 10px;
-            text-align: left;  /* 텍스트 왼쪽 정렬 */
+            text-align: left;
         }
 
         #billboard-list {
             list-style-type: none;
             padding-left: 0;
             font-size: 1rem;
-            color: #333;
+            color: #b3b3b3;  /* 밝은 회색 */
             margin-top: 0;
         }
 
@@ -149,10 +187,8 @@
         // Billboard 핫100 목록을 가져오는 함수
         async function fetchBillboardHot100() {
             try {
-                console.log('하하하하ㅏ')
                 const response = await fetch('http://localhost:3000/billchart');
                 const data = await response.json();
-                console.log(data)
 
                 // Billboard Hot 100 목록을 표시
                 const listElement = document.getElementById('billboard-list');
