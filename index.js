@@ -15,18 +15,16 @@ app.listen(PORT, () => {
   console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
 });
 
-// URL 경로에 가수와 노래 제목을 포함시키기
+// 가사 검색 API 엔드포인트
 app.get('/artist/:artist/title/:title', async (req, res) => {
-    let artist = req.params.artist;  // URL에서 'artist' 파라미터 받기
-    let title = req.params.title;    // URL에서 'title' 파라미터 받기
+    let artist = req.params.artist;
+    let title = req.params.title;
 
     try {
-        // 외부 API로부터 가사를 가져옵니다.
         const response = await axios.get(`https://api.lyrics.ovh/v1/${artist}/${title}`);
-        
-        // 가사를 가져오면 응답으로 반환
+
         if (response.data.lyrics) {
-            res.send(`${artist}의 ${title} 가사입니다:\n\n${response.data.lyrics}`);
+            res.send(`${artist}의 ${title} 가사\n\n${response.data.lyrics}`);
         } else {
             res.send(`가사를 찾을 수 없습니다. 다른 노래 제목을 시도해 주세요.`);
         }
@@ -35,15 +33,21 @@ app.get('/artist/:artist/title/:title', async (req, res) => {
     }
 });
 
-
-
+// Billboard Hot 100 데이터 제공 엔드포인트
 app.get('/billchart', async (req, res) => {
     try {
-        // 외부 API 호출
         const response = await axios.get('https://raw.githubusercontent.com/KoreanThinker/billboard-json/main/billboard-hot-100/recent.json');
-        
-        // 데이터를 클라이언트에게 JSON 형태로 전달
-        res.json(response.data); // 응답 데이터 형식 확인
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'API 호출에 실패했습니다.' });
+    }
+});
+
+// ✅ Billboard Artist 100 데이터 제공 엔드포인트 (추가된 부분)
+app.get('/billartist', async (req, res) => {
+    try {
+        const response = await axios.get('https://raw.githubusercontent.com/KoreanThinker/billboard-json/main/billboard-artist-100/recent.json');
+        res.json(response.data);
     } catch (error) {
         res.status(500).json({ error: 'API 호출에 실패했습니다.' });
     }

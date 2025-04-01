@@ -78,8 +78,8 @@
         #billboard-container {
             position: fixed;  /* 화면에 고정 */
             top: 20px;  /* 상단에서 20px 떨어짐 */
-            right: 20px;  /* 오른쪽에서 20px 떨어짐 */
-            width: 280px;  /* 너비 설정 */
+            right: 30px;  /* 오른쪽에서 20px 떨어짐 */
+            width: 300px;  /* 너비 설정 */
             background-color: #1c1c1c;  /* 어두운 배경 */
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -98,28 +98,65 @@
         }
 
         #billboard-list li {
-            margin-bottom: 15px;
             display: flex;
-            align-items: center;  /* 수직 중앙 정렬 */
+            align-items: center;
             font-size: 1rem;
             color: #ffffff;
+            margin-bottom: 10px;
         }
 
         #billboard-list img {
-            width: 50px;  /* 앨범 커버 크기 */
-            height: 50px;
+            width: 60px;  /* 크기 조정 */
+            height: 60px;
             border-radius: 5px;
-            margin-right: 10px; /* 앨범 커버와 제목 사이 간격 */
+            margin-right: 10px; /* 간격 줄임 */
         }
 
         #billboard-list li span {
-            flex: 1;
+            flex-grow: 1; /* 텍스트가 유연하게 확장 */
+            white-space: normal; /* 여러 줄 허용 */
+            word-wrap: break-word; /* 긴 단어 줄바꿈 */
         }
 
         #billboard-list li .rank {
             font-weight: bold;
             margin-right: 10px;
-            color: #1DB954;  /* 초록색으로 랭크 강조 */
+            color: #1DB954;
+        }
+
+                /* Billboard Artist 100 스타일 */
+        #billboard-artist-container {
+            position: fixed;  /* 화면에 고정 */
+            top: 20px;  /* 상단 여백 */
+            left: 30px;  /* 왼쪽에 배치 */
+            width: 250px;  /* 너비 */
+            background-color: #1c1c1c;  /* 어두운 배경 */
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            text-align: left;
+            max-height: 80vh; /* 높이 제한 */
+            overflow-y: auto; /* 스크롤 가능 */
+        }
+
+        #billboard-artist-list {
+            list-style-type: none;
+            padding-left: 0;
+            font-size: 1rem;
+            color: #b3b3b3;  /* 밝은 회색 */
+            margin-top: 0;
+        }
+
+        #billboard-artist-list li {
+            font-size: 1rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        #billboard-artist-list li .rank {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #1DB954;
         }
 
     </style>
@@ -156,6 +193,14 @@
             </ul>
         </div>
     </div>
+        <!-- Billboard Artist 100 리스트 -->
+        <div id="billboard-artist-container">
+            <h2>Billboard Artist 100</h2>
+            <ul id="billboard-artist-list">
+                <!-- Billboard 아티스트 100 데이터가 여기에 표시됩니다 -->
+            </ul>
+        </div>
+    
 
     <script>
         // 폼 제출 시 가사 검색
@@ -243,6 +288,86 @@
             link.download = `${artist}_${title}_lyrics.txt`;
             link.click();
         }
+
+        // Billboard Artist 100 목록을 가져오는 함수
+        async function fetchBillboardArtist100() {
+            try {
+                const response = await fetch('http://localhost:3000/billartist'); // ✅ 로컬 서버에서 데이터 요청
+                const data = await response.json();
+
+                const listElement = document.getElementById('billboard-artist-list');
+                listElement.innerHTML = ''; // 기존 목록 초기화
+
+                data.data.slice(0, 20).forEach(artist => {
+                    const listItem = document.createElement('li');
+
+                    const rank = document.createElement('span');
+                    rank.classList.add('rank');
+                    rank.textContent = `${artist.rank}. `;
+
+                    const text = document.createElement('span');
+                    text.textContent = artist.name;
+
+                    listItem.appendChild(rank);
+                    listItem.appendChild(text);
+                    listElement.appendChild(listItem);
+                });
+
+            } catch (error) {
+                console.error('Billboard Artist 100 데이터를 가져오는 데 실패했습니다.', error);
+            }
+        }
+
+        // 페이지 로드 시 Billboard Hot 100 & Artist 100 가져오기
+        window.onload = function() {
+            fetchBillboardHot100();
+            fetchBillboardArtist100();
+        };
+
+        // Billboard Artist 100 목록을 가져오는 함수 (이미지 추가)
+async function fetchBillboardArtist100() {
+    try {
+        const response = await fetch('http://localhost:3000/billartist'); // ✅ 서버에서 Artist 100 데이터 요청
+        const data = await response.json();
+
+        const listElement = document.getElementById('billboard-artist-list');
+        listElement.innerHTML = ''; // 기존 목록 초기화
+
+        data.data.slice(0, 20).forEach(artist => {
+            const listItem = document.createElement('li');
+            listItem.style.display = "flex";  // 아티스트 이미지와 텍스트를 나란히 정렬
+            listItem.style.alignItems = "center";
+
+            // ✅ 순위 표시
+            const rank = document.createElement('span');
+            rank.classList.add('rank');
+            rank.textContent = `${artist.rank}. `;
+
+            // ✅ 아티스트 이미지 추가
+            const img = document.createElement('img');
+            img.src = artist.image; // API에서 제공하는 아티스트 이미지 URL
+            img.style.width = "50px";  // 이미지 크기 조정
+            img.style.height = "50px";
+            img.style.borderRadius = "50%";  // 원형 프로필 스타일
+            img.style.marginRight = "10px";  // 간격 추가
+
+            // ✅ 아티스트 이름
+            const text = document.createElement('span');
+            text.textContent = artist.name;
+
+            // ✅ 리스트 아이템에 추가
+            listItem.appendChild(rank);
+            listItem.appendChild(img);  // 이미지 추가!
+            listItem.appendChild(text);
+            listElement.appendChild(listItem);
+        });
+
+    } catch (error) {
+        console.error('Billboard Artist 100 데이터를 가져오는 데 실패했습니다.', error);
+    }
+}
+
     </script>
+    
 </body>
 </html>
