@@ -2,18 +2,27 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');  // CORS 미들웨어
 const path = require('path');
+const { OpenAI } = require('openai');
+require('dotenv').config();
 const app = express();
 const PORT = 3000;
+const bodyParser = require('body-parser');
 
 // CORS 설정
 app.use(cors());
 
 // 정적 파일 제공
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
 
 app.listen(PORT, () => {
   console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
 });
+
+// OpenAI API 설정
+const openai = new OpenAI({
+    apiKey : process.env.OPENAI_API_KEY, // 여기에 OpenAI API 키를 넣어주세요.
+  });
 
 // 가사 검색 API 엔드포인트
 app.get('/artist/:artist/title/:title', async (req, res) => {
@@ -52,3 +61,29 @@ app.get('/billartist', async (req, res) => {
         res.status(500).json({ error: 'API 호출에 실패했습니다.' });
     }
 });
+
+app.post('/translate-lyrics', async (req, res) => {
+    const { lyrics } = req.body; // POST 요청의 body에서 'lyrics'를 받음
+  
+    if (!lyrics) {
+      return res.status(400).send({ message: '가사를 입력해 주세요.' });
+    }
+  
+    try {
+      // GPT-4 모델을 사용하여 번역 요청
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant that translates English text into Korean.' },
+          { role: 'user', content: `Translate the following song lyrics into Korean:\n\n${lyrics}` },
+        ],
+      });
+  
+      // GPT의 번역 결과를 응답으로 반환
+      const translatedLyrics = response.choices[0].message.content.trim();
+      res.json({ translatedLyrics });
+    } catch (error) {
+      console.error('Error during translation:', error);
+      res.status(500).send({ message: '번역 중 오류가 발생했습니다.' });
+    }
+  });
