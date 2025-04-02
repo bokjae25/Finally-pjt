@@ -296,42 +296,45 @@ async function fetchLyrics(artist, title) {
 }
 
     // 가사 번역 함수
-    async function translateLyricsToKorean(lyrics) {
-        const resultDiv = document.getElementById('lyrics-result');
-        resultDiv.innerHTML = '<p>번역 중...</p>'; // 번역 중 메시지 표시
+async function translateLyricsToKorean(lyrics) {
+    const resultDiv = document.getElementById('lyrics-result');
+    resultDiv.innerHTML = '<p>번역 중...</p>'; // 번역 중 메시지 표시
 
-        try {
-            // OpenAI API 요청
-            const response = await fetch('http://localhost:3000/translate-lyrics', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ lyrics: lyrics }) // 노래 가사를 보내서 번역 요청
-            });
+    try {
+        // OpenAI API 요청
+        const response = await fetch('http://localhost:3000/translate-lyrics', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ lyrics: lyrics }) // 노래 가사를 보내서 번역 요청
+        });
 
-            const data = await response.json();
-            resultDiv.innerHTML = `<pre>${data.translatedLyrics}</pre>`; // 번역된 가사 표시
+        const data = await response.json();
+        resultDiv.innerHTML = `<pre>${data.translatedLyrics}</pre>`; // 번역된 가사 표시
 
-            // 번역 후에도 다운로드 버튼과 즐겨찾기 추가 버튼 유지
-            const downloadButton = document.createElement('button');
-            downloadButton.textContent = '가사 다운로드';
-            downloadButton.onclick = function () {
-                downloadLyrics(data.translatedLyrics, '번역된 가사', '번역된 제목');
-            };
-            resultDiv.appendChild(downloadButton);
+        // 기존 버튼 제거 (중복 생성 방지)
+        const existingButtons = document.querySelectorAll('#lyrics-result button');
+        existingButtons.forEach(button => button.remove());
 
-            const favoriteButton = document.createElement('button');
-            favoriteButton.textContent = '즐겨찾기 추가';
-            favoriteButton.onclick = function () {
-                addFavorite('번역된 가사', '번역된 제목');
-            };
-            resultDiv.appendChild(favoriteButton);
+        // 번역 후에도 다운로드 버튼과 즐겨찾기 추가 버튼 유지
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = '가사 다운로드';
+        downloadButton.onclick = function () {
+            downloadLyrics(data.translatedLyrics, '번역된 가사', '번역된 제목');
+        };
+        resultDiv.appendChild(downloadButton);
 
-        } catch (error) {
-            resultDiv.innerHTML = '<p>번역 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
-        }
+        const favoriteButton = document.createElement('button');
+        favoriteButton.textContent = '즐겨찾기 추가';
+        favoriteButton.onclick = function () {
+            addFavorite('번역된 가사', '번역된 제목');
+        };
+        resultDiv.appendChild(favoriteButton);
+    } catch (error) {
+        resultDiv.innerHTML = '<p>번역 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
     }
+}
          
          // 즐겨찾기 목록 불러오기
         function loadFavorites() {
