@@ -72,10 +72,9 @@ app.post('/translate-lyrics', async (req, res) => {
     try {
       // GPT-4 모델을 사용하여 번역 요청
       const response = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are a helpful assistant that translates English text into Korean.' },
-          { role: 'user', content: `Translate the following song lyrics into Korean:\n\n${lyrics}` },
+          { role: 'user', content: `한국어로 번역해줘 :\n\n${lyrics}` },
         ],
       });
   
