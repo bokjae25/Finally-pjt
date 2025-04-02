@@ -237,39 +237,77 @@
     
 
     <script>
+         
          // 즐겨찾기 목록 불러오기
-         function loadFavorites() {
+        function loadFavorites() {
             const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
             const favoritesList = document.getElementById('favorites-list');
             favoritesList.innerHTML = ''; // 기존 목록 초기화
 
             favorites.forEach((favorite, index) => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${favorite.artist} - ${favorite.title}`;
+                const listItem = document.createElement('li');
+                listItem.textContent = `${favorite.artist} - ${favorite.title}`;
 
-            const removeButton = document.createElement('button');
-            removeButton.textContent = '✖'; // 아이콘처럼 간결하게
-            removeButton.style.marginLeft = '10px';
-            removeButton.style.padding = '2px 6px'; // 크기 축소
-            removeButton.style.fontSize = '12px'; // 글자 크기 줄이기
-            removeButton.style.width = '24px'; // 버튼 크기 줄이기
-            removeButton.style.height = '24px';
-            removeButton.style.backgroundColor = '#FF4C4C';
-            removeButton.style.color = 'white';
-            removeButton.style.border = 'none';
-            removeButton.style.borderRadius = '50%'; // 원형 버튼 스타일
-            removeButton.style.cursor = 'pointer';
-            removeButton.style.display = 'inline-flex';
-            removeButton.style.justifyContent = 'center';
-            removeButton.style.alignItems = 'center';
+                const removeButton = document.createElement('button');
+                removeButton.textContent = '✖'; // 아이콘처럼 간결하게
+                removeButton.style.marginLeft = '10px';
+                removeButton.style.padding = '2px 6px'; // 크기 축소
+                removeButton.style.fontSize = '12px'; // 글자 크기 줄이기
+                removeButton.style.width = '24px'; // 버튼 크기 줄이기
+                removeButton.style.height = '24px';
+                removeButton.style.backgroundColor = '#FF4C4C';
+                removeButton.style.color = 'white';
+                removeButton.style.border = 'none';
+                removeButton.style.borderRadius = '50%'; // 원형 버튼 스타일
+                removeButton.style.cursor = 'pointer';
+                removeButton.style.display = 'inline-flex';
+                removeButton.style.justifyContent = 'center';
+                removeButton.style.alignItems = 'center';
+                
+                removeButton.onclick = function () {
+                    removeFavorite(index);
+                };
 
-            removeButton.onclick = function () {
-                removeFavorite(index);
-            };
+                // 클릭 시 해당 노래의 가사를 불러오는 함수 호출
+                listItem.onclick = function () {
+                    fetchLyrics(favorite.artist, favorite.title);
+                };
 
-            listItem.appendChild(removeButton);
-            favoritesList.appendChild(listItem);
-        });
+                listItem.appendChild(removeButton);
+                favoritesList.appendChild(listItem);
+            })
+        }
+
+        // 가사 검색
+        async function fetchLyrics(artist, title) {
+            const resultDiv = document.getElementById('lyrics-result');
+            resultDiv.innerHTML = '<p>로딩 중...</p>';  // 로딩 메시지 표시
+
+            try {
+                const response = await fetch(`http://localhost:3000/artist/${artist}/title/${title}`);
+                const data = await response.text();
+
+                resultDiv.innerHTML = `<pre>${data}</pre>`;
+                addSearchHistory(artist, title, data);
+
+                const downloadButton = document.createElement('button');
+                downloadButton.textContent = '가사 다운로드';
+                downloadButton.onclick = function () {
+                    downloadLyrics(data, artist, title);
+                };
+                resultDiv.appendChild(downloadButton);
+
+                // 즐겨찾기 버튼 추가
+                const favoriteButton = document.createElement('button');
+                favoriteButton.textContent = '즐겨찾기 추가';
+                favoriteButton.onclick = function () {
+                    addFavorite(artist, title);
+                };
+                resultDiv.appendChild(favoriteButton);
+
+            } catch (error) {
+                resultDiv.innerHTML = '<p>가사를 가져오는 데 실패했습니다. 다시 시도해주세요.</p>';
+            }
         }
         
         // 즐겨찾기에서 특정 노래 제거
